@@ -9,6 +9,7 @@ import click
 from mcp_review.diff import PullRequestRef, fetch_changed_source_files, fetch_pr_diff
 from mcp_review.engine import run_review
 from mcp_review.report import to_json, to_markdown
+from mcp_review.repo import clone_pr_head
 
 _PR_URL_RE = re.compile(r"github\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/pull/(?P<number>\d+)")
 
@@ -30,7 +31,12 @@ def parse_pr_ref(value: str) -> PullRequestRef:
 @click.argument("pr_ref")
 @click.option("--format", "output_format", type=click.Choice(["markdown", "json"]), default="markdown")
 @click.option("--skip-llm", is_flag=True, help="Run only the free T0 static checks, skip the Claude call.")
-def main(pr_ref: str, output_format: str, skip_llm: bool) -> None:
+@click.option(
+    "--agentic",
+    is_flag=True,
+    help="Also run the T2 agentic pass (clones the PR head locally; slower and costs more).",
+)
+def main(pr_ref: str, output_format: str, skip_llm: bool, agentic: bool) -> None:
     """Review a GitHub PR against the MCP mistake checklist.
 
     PR_REF: a GitHub PR URL, or owner/repo#number (e.g. modelcontextprotocol/servers#123).
@@ -42,7 +48,12 @@ def main(pr_ref: str, output_format: str, skip_llm: bool) -> None:
     changed_files = fetch_changed_source_files(pr)
     click.echo(f"{len(changed_files)} changed source file(s) to scan.", err=True)
 
-    result = run_review(diff_text, changed_files, skip_llm=skip_llm)
+    if agentic:
+        click.echo("Cloning PR head for the T2 agentic pass...", err=True)
+        with clone_pr_head(pr) as repo_root:
+            result = run_review(diff_text, changed_files, skip_llm=skip_llm, run_agentic=True, repo_root=repo_root)
+    else:
+        result = run_review(diff_text, changed_files, skip_llm=skip_llm)
 
     if output_format == "json":
         click.echo(to_json(result))

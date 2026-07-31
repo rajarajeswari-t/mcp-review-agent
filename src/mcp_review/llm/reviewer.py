@@ -2,7 +2,7 @@
 
 Structured outputs (`output_config.format`) guarantee the response is valid JSON matching
 `findings_output_schema()`, including the `rule_id` enum — so a hallucinated rule_id
-should be impossible in practice, but we still guard defensively rather than trust that.
+should be impossible in practice, but parse_findings still guards defensively.
 """
 
 from __future__ import annotations
@@ -11,18 +11,13 @@ import json
 import logging
 from dataclasses import dataclass, field
 
-from mcp_review.checklist import CHECKLIST_BY_ID
 from mcp_review.findings import Finding, Tier
 from mcp_review.llm.client import DEFAULT_MAX_TOKENS, build_client, get_effort, get_model
+from mcp_review.llm.parsing import parse_findings
 from mcp_review.llm.prompts import build_t1_system_prompt, build_user_message
 from mcp_review.llm.schema import findings_output_schema
 
 logger = logging.getLogger(__name__)
-
-# Below this, Claude itself isn't confident it's a real instance — drop it rather than
-# add noise. This is the model's per-instance confidence in *this* finding, which is a
-# different axis from Finding.confidence (the checklist item's fixed spec authority).
-_MIN_CONFIDENCE_TO_REPORT = {"high", "medium"}
 
 
 @dataclass
@@ -46,7 +41,7 @@ class LLMReviewer:
             messages=[{"role": "user", "content": build_user_message(diff_text)}],
             output_config={
                 "effort": self._effort,
-                "format": {"type": "json_schema", "schema": findings_output_schema()},
+                "format": {"type": "json_schema", "schema": findings_output_schema(Tier.T1)},
             },
         )
 
@@ -60,35 +55,4 @@ class LLMReviewer:
             return T1ReviewOutcome()
 
         payload = json.loads(text)
-        findings: list[Finding] = []
-        for raw in payload.get("findings", []):
-            finding = self._to_finding(raw)
-            if finding is not None:
-                findings.append(finding)
-        return T1ReviewOutcome(findings=findings)
-
-    def _to_finding(self, raw: dict) -> Finding | None:
-        rule_id = raw.get("rule_id")
-        checklist_item = CHECKLIST_BY_ID.get(rule_id)
-        if checklist_item is None:
-            logger.warning("T1 response referenced unknown rule_id %r; skipping", rule_id)
-            return None
-
-        if raw.get("confidence") not in _MIN_CONFIDENCE_TO_REPORT:
-            return None
-
-        message = raw.get("message", "")
-        if raw.get("confidence") == "medium":
-            message = f"{message} (model confidence: medium — verify manually)"
-
-        return Finding(
-            rule_id=checklist_item.id,
-            title=checklist_item.title,
-            message=message,
-            severity=checklist_item.severity,
-            confidence=checklist_item.confidence,
-            tier=Tier.T1,
-            file=raw.get("file"),
-            line=raw.get("line"),
-            spec_ref=checklist_item.spec_ref,
-        )
+        return T1ReviewOutcome(findings=parse_findings(payload, Tier.T1))

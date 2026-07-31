@@ -1,4 +1,4 @@
-"""Structured-output JSON schema for the T1 review pass.
+"""Structured-output JSON schema for the T1 and T2 review passes.
 
 Built from the checklist itself so the set of valid `rule_id` values can't drift out of
 sync with what the prompt actually asks Claude to look for.
@@ -10,11 +10,11 @@ from mcp_review.checklist import items_for_tier
 from mcp_review.findings import Tier
 
 
-def t1_rule_ids() -> list[str]:
-    return [item.id for item in items_for_tier(Tier.T1)]
+def rule_ids_for_tier(tier: Tier) -> list[str]:
+    return [item.id for item in items_for_tier(tier)]
 
 
-def findings_output_schema() -> dict:
+def findings_output_schema(tier: Tier) -> dict:
     return {
         "type": "object",
         "properties": {
@@ -25,7 +25,7 @@ def findings_output_schema() -> dict:
                     "properties": {
                         "rule_id": {
                             "type": "string",
-                            "enum": t1_rule_ids(),
+                            "enum": rule_ids_for_tier(tier),
                             "description": "Which checklist item this finding matches.",
                         },
                         "file": {
@@ -34,7 +34,7 @@ def findings_output_schema() -> dict:
                         },
                         "line": {
                             "type": "integer",
-                            "description": "Line number in the new version of the file, if determinable from the diff.",
+                            "description": "Line number in the new version of the file, if determinable.",
                         },
                         "message": {
                             "type": "string",

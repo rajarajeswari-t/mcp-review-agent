@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import base64
 import json
-import subprocess
 from dataclasses import dataclass
 from urllib.parse import urlsplit
 
+from mcp_review.gh import run_gh
 from mcp_review.static_rules.base import SourceFile
 
 # MCP servers are commonly implemented in these languages; T0 rules only know how to
@@ -30,14 +30,9 @@ class PullRequestRef:
         return f"{self.owner}/{self.repo}"
 
 
-def _run_gh(args: list[str]) -> str:
-    result = subprocess.run(["gh", *args], capture_output=True, text=True, check=True)
-    return result.stdout
-
-
 def fetch_pr_diff(pr: PullRequestRef) -> str:
     """Full unified diff text for the PR — the T1 Claude review's context."""
-    return _run_gh(["pr", "diff", str(pr.number), "--repo", pr.slug])
+    return run_gh(["pr", "diff", str(pr.number), "--repo", pr.slug])
 
 
 def fetch_changed_source_files(pr: PullRequestRef) -> list[SourceFile]:
@@ -46,7 +41,7 @@ def fetch_changed_source_files(pr: PullRequestRef) -> list[SourceFile]:
     T0 rules need full-file context (e.g. "is there an Origin check anywhere in this
     file"), which a diff hunk alone can't answer.
     """
-    raw = _run_gh(["api", f"repos/{pr.owner}/{pr.repo}/pulls/{pr.number}/files", "--paginate"])
+    raw = run_gh(["api", f"repos/{pr.owner}/{pr.repo}/pulls/{pr.number}/files", "--paginate"])
     entries = json.loads(raw)
 
     files: list[SourceFile] = []
@@ -70,7 +65,7 @@ def _fetch_file_content(contents_url: str) -> str | None:
     if split.query:
         endpoint = f"{endpoint}?{split.query}"
 
-    raw = _run_gh(["api", endpoint, "--jq", ".content"]).strip()
+    raw = run_gh(["api", endpoint, "--jq", ".content"]).strip()
     if not raw:
         return None
 
