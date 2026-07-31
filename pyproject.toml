@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-review"
+version = "0.1.0"
+description = "A code-review agent that checks MCP server PRs against a checklist of known MCP-specific mistakes"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40.0",
+    "click>=8.1",
+    "unidiff>=0.7.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+mcp-review = "mcp_review.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
