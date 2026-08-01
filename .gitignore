@@ -9,3 +9,4 @@ dist/
 .env
 *.env
 scripts/backtest_output/
+.claude/settings.local.json
