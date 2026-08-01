@@ -9,6 +9,7 @@ def _fake_response(payload: dict, stop_reason: str = "end_turn", stop_details=No
         stop_reason=stop_reason,
         stop_details=stop_details,
         content=[SimpleNamespace(type="text", text=json.dumps(payload))],
+        usage=SimpleNamespace(input_tokens=100, output_tokens=50),
     )
 
 

@@ -15,7 +15,12 @@ def _tool_use_block(tool_id: str, name: str, tool_input: dict):
 
 
 def _response(content, stop_reason="end_turn", stop_details=None):
-    return SimpleNamespace(stop_reason=stop_reason, stop_details=stop_details, content=content)
+    return SimpleNamespace(
+        stop_reason=stop_reason,
+        stop_details=stop_details,
+        content=content,
+        usage=SimpleNamespace(input_tokens=100, output_tokens=50),
+    )
 
 
 class _QueuedMessages:

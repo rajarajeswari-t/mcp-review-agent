@@ -25,6 +25,8 @@ class T1ReviewOutcome:
     findings: list[Finding] = field(default_factory=list)
     refused: bool = False
     refusal_reason: str | None = None
+    input_tokens: int = 0
+    output_tokens: int = 0
 
 
 class LLMReviewer:
@@ -45,14 +47,21 @@ class LLMReviewer:
             },
         )
 
+        input_tokens = getattr(response.usage, "input_tokens", 0) if response.usage else 0
+        output_tokens = getattr(response.usage, "output_tokens", 0) if response.usage else 0
+
         if response.stop_reason == "refusal":
             reason = getattr(response.stop_details, "category", None) if response.stop_details else None
             logger.warning("T1 review call was refused (category=%s); skipping LLM findings for this diff", reason)
-            return T1ReviewOutcome(refused=True, refusal_reason=reason)
+            return T1ReviewOutcome(
+                refused=True, refusal_reason=reason, input_tokens=input_tokens, output_tokens=output_tokens
+            )
 
         text = next((block.text for block in response.content if block.type == "text"), None)
         if text is None:
-            return T1ReviewOutcome()
+            return T1ReviewOutcome(input_tokens=input_tokens, output_tokens=output_tokens)
 
         payload = json.loads(text)
-        return T1ReviewOutcome(findings=parse_findings(payload, Tier.T1))
+        return T1ReviewOutcome(
+            findings=parse_findings(payload, Tier.T1), input_tokens=input_tokens, output_tokens=output_tokens
+        )

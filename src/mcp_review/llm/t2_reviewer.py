@@ -35,6 +35,9 @@ class T2ReviewOutcome:
     refused: bool = False
     refusal_reason: str | None = None
     hit_max_iterations: bool = False
+    input_tokens: int = 0
+    output_tokens: int = 0
+    turns: int = 0
 
 
 class AgenticReviewer:
@@ -46,8 +49,10 @@ class AgenticReviewer:
     def review_repo(self, repo_root: Path, diff_text: str) -> T2ReviewOutcome:
         tools = T2ToolSet(repo_root)
         messages: list[dict] = [{"role": "user", "content": build_t2_user_message(diff_text)}]
+        input_tokens = 0
+        output_tokens = 0
 
-        for _ in range(_MAX_ITERATIONS):
+        for turn in range(1, _MAX_ITERATIONS + 1):
             response = self._client.messages.create(
                 model=self._model,
                 max_tokens=_MAX_TOKENS,
@@ -59,14 +64,27 @@ class AgenticReviewer:
                     "format": {"type": "json_schema", "schema": findings_output_schema(Tier.T2)},
                 },
             )
+            if response.usage:
+                input_tokens += getattr(response.usage, "input_tokens", 0)
+                output_tokens += getattr(response.usage, "output_tokens", 0)
 
             if response.stop_reason == "refusal":
                 reason = getattr(response.stop_details, "category", None) if response.stop_details else None
                 logger.warning("T2 review call was refused (category=%s)", reason)
-                return T2ReviewOutcome(refused=True, refusal_reason=reason)
+                return T2ReviewOutcome(
+                    refused=True,
+                    refusal_reason=reason,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    turns=turn,
+                )
 
             if response.stop_reason != "tool_use":
-                return self._parse_final_response(response)
+                outcome = self._parse_final_response(response)
+                outcome.input_tokens = input_tokens
+                outcome.output_tokens = output_tokens
+                outcome.turns = turn
+                return outcome
 
             messages.append({"role": "assistant", "content": response.content})
             tool_results = []
@@ -79,7 +97,9 @@ class AgenticReviewer:
             messages.append({"role": "user", "content": tool_results})
 
         logger.warning("T2 review hit max_iterations (%d) without a final answer", _MAX_ITERATIONS)
-        return T2ReviewOutcome(hit_max_iterations=True)
+        return T2ReviewOutcome(
+            hit_max_iterations=True, input_tokens=input_tokens, output_tokens=output_tokens, turns=_MAX_ITERATIONS
+        )
 
     def _parse_final_response(self, response) -> T2ReviewOutcome:
         text = next((b.text for b in response.content if b.type == "text"), None)
