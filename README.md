@@ -62,6 +62,27 @@ mcp-review owner/repo#123 --skip-llm
 mcp-review owner/repo#123 --agentic
 ```
 
+## Web UI
+
+```bash
+mcp-review-ui                 # opens http://localhost:8765/
+mcp-review-ui --port 9000 --no-open
+```
+
+A local single-page UI over the same engine (standard library only, no extra dependencies):
+
+- **GitHub PR mode** — paste a PR URL or `owner/repo#123` (needs `gh`, same as the CLI).
+- **Paste code mode** — paste one or more server files (or a diff) and review them without
+  `gh` or a real PR. T1 reviews them as new files; T2 runs over a temp checkout of just those files.
+- Toggle the T1 Claude and T2 agentic passes. Each tier shows live progress, finding counts,
+  token usage and refusals.
+- Filter findings by severity, tier or text. Each finding links to its checklist entry and
+  the MCP spec section. Copy the Markdown report for a PR comment, or download the JSON.
+- A **Checklist** tab lists all 24 items by category and tier.
+
+The server binds to `127.0.0.1` and rejects foreign `Host` headers and cross-origin POSTs,
+so another web page can't use it to spend your Anthropic credits.
+
 ## Backtesting
 
 ```bash

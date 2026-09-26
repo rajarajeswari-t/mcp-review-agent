@@ -20,6 +20,10 @@ dev = [
 
 [project.scripts]
 mcp-review = "mcp_review.cli:main"
+mcp-review-ui = "mcp_review.web.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"mcp_review.web" = ["static/*"]

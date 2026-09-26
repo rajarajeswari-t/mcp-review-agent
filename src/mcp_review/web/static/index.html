@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Review</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%235b5bd6'/><path d='M9 16.5l4.5 4.5L23 11.5' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --border: #e2e5ea;
+  --border-strong: #cfd4dc;
+  --text: #16181d;
+  --text-2: #4b5260;
+  --text-3: #7a8190;
+  --accent: #5b5bd6;
+  --accent-2: #4a4ac4;
+  --accent-soft: #ececfd;
+  --sec: #d93a3a;      --sec-soft: #fdecec;
+  --cor: #c77a0a;      --cor-soft: #fdf3e2;
+  --spec: #2f7ad0;     --spec-soft: #e8f1fc;
+  --ok: #1f8f55;       --ok-soft: #e4f5ec;
+  --code-bg: #f4f5f8;
+  --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+  --radius: 12px;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e0f13; --surface: #16181e; --surface-2: #1c1f26; --border: #262a33; --border-strong: #343945;
+    --text: #e8eaef; --text-2: #aab0bd; --text-3: #7c8392;
+    --accent: #7c7cf0; --accent-2: #9393f5; --accent-soft: #23234a;
+    --sec: #f07171; --sec-soft: #3a1a1c; --cor: #f0b35a; --cor-soft: #36280f;
+    --spec: #6aa8f0; --spec-soft: #152a45; --ok: #4fc98a; --ok-soft: #10301f;
+    --code-bg: #111318; --shadow: 0 1px 2px rgba(0,0,0,.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e0f13; --surface: #16181e; --surface-2: #1c1f26; --border: #262a33; --border-strong: #343945;
+  --text: #e8eaef; --text-2: #aab0bd; --text-3: #7c8392;
+  --accent: #7c7cf0; --accent-2: #9393f5; --accent-soft: #23234a;
+  --sec: #f07171; --sec-soft: #3a1a1c; --cor: #f0b35a; --cor-soft: #36280f;
+  --spec: #6aa8f0; --spec-soft: #152a45; --ok: #4fc98a; --ok-soft: #10301f;
+  --code-bg: #111318; --shadow: 0 1px 2px rgba(0,0,0,.4);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font: 14px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+button, input, textarea, select { font: inherit; color: inherit; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, pre, .mono { font-family: var(--mono); font-size: 12.5px; }
+
+/* ---------- header ---------- */
+header.top {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.top-inner { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 650; font-size: 15px; letter-spacing: -.01em; }
+.brand-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
+.brand small { color: var(--text-3); font-weight: 500; font-size: 12px; margin-left: 2px; }
+nav.tabs { display: flex; gap: 2px; margin-left: 12px; }
+nav.tabs button {
+  border: 0; background: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; color: var(--text-2); font-weight: 520;
+}
+nav.tabs button:hover { background: var(--surface-2); color: var(--text); }
+nav.tabs button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); border: 1px solid var(--border); }
+.env { margin-left: auto; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: 12px; white-space: nowrap;
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); }
+.dot.ok { background: var(--ok); } .dot.bad { background: var(--sec); }
+.icon-btn { border: 1px solid var(--border); background: var(--surface); border-radius: 8px; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; color: var(--text-2); }
+.icon-btn:hover { color: var(--text); border-color: var(--border-strong); }
+
+main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.view[hidden] { display: none !important; }
+
+/* ---------- layout ---------- */
+.review-grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
+@media (max-width: 920px) { .review-grid { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.card-pad { padding: 18px; }
+.side { position: sticky; top: 76px; display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 920px) { .side { position: static; } }
+h2.section { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); font-weight: 600; margin: 0 0 12px; }
+
+/* ---------- form ---------- */
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border-radius: 9px; padding: 3px; margin-bottom: 16px; }
+.seg button { border: 0; background: none; padding: 7px; border-radius: 7px; cursor: pointer; color: var(--text-2); font-weight: 540; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+label.field { display: block; font-weight: 560; font-size: 13px; margin-bottom: 6px; }
+.hint { color: var(--text-3); font-size: 12px; margin-top: 6px; }
+input[type=text], textarea {
+  width: 100%; border: 1px solid var(--border-strong); background: var(--surface); border-radius: 8px; padding: 9px 11px; outline: none;
+  transition: border-color .12s, box-shadow .12s;
+}
+input[type=text]:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+textarea { font-family: var(--mono); font-size: 12.5px; resize: vertical; min-height: 180px; tab-size: 2; }
+.file-block { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.file-head { display: flex; gap: 6px; align-items: center; padding: 6px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+.file-head input { border: 0 !important; box-shadow: none !important; background: transparent; padding: 4px 6px; font-family: var(--mono); font-size: 12.5px; }
+.file-block textarea { border: 0; border-radius: 0; min-height: 160px; }
+.file-block textarea:focus { box-shadow: inset 0 0 0 2px var(--accent-soft); }
+.link-btn { border: 0; background: none; color: var(--accent); cursor: pointer; padding: 4px 6px; border-radius: 6px; font-size: 13px; font-weight: 540; }
+.link-btn:hover { background: var(--accent-soft); }
+.link-btn.muted { color: var(--text-3); }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+details.more summary { cursor: pointer; color: var(--text-2); font-size: 13px; font-weight: 540; margin: 6px 0; }
+
+.tiers { display: flex; flex-direction: column; gap: 8px; margin: 18px 0; }
+.tier { display: flex; gap: 12px; align-items: flex-start; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color .12s, background .12s; }
+.tier:hover { border-color: var(--border-strong); }
+.tier.on { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface)); }
+.tier.locked { cursor: default; }
+.tier input { display: none; }
+.switch { flex: none; width: 30px; height: 18px; border-radius: 999px; background: var(--border-strong); position: relative; margin-top: 2px; transition: background .15s; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+.tier.on .switch { background: var(--accent); }
+.tier.on .switch::after { transform: translateX(12px); }
+.tier-title { font-weight: 580; display: flex; gap: 8px; align-items: center; }
+.tier-desc { color: var(--text-3); font-size: 12.5px; }
+.tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 5px; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); font-family: var(--mono); }
+.warn-note { font-size: 12px; color: var(--cor); margin-top: 2px; }
+
+.btn-primary {
+  width: 100%; border: 0; background: var(--accent); color: #fff; font-weight: 600; padding: 10px 14px; border-radius: 9px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .12s, transform .05s;
+}
+.btn-primary:hover { background: var(--accent-2); }
+.btn-primary:active { transform: translateY(1px); }
+.btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+.btn { border: 1px solid var(--border-strong); background: var(--surface); padding: 6px 11px; border-radius: 8px; cursor: pointer; font-weight: 540; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+.btn:hover { background: var(--surface-2); }
+.form-error { color: var(--sec); font-size: 13px; margin-top: 10px; }
+kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,.35); opacity: .85; }
+
+/* ---------- history ---------- */
+.history { display: flex; flex-direction: column; gap: 2px; }
+.hist-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
+.hist-item:hover { background: var(--surface-2); }
+.hist-item.active { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+.hist-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 12.5px; }
+.hist-meta { color: var(--text-3); font-size: 12px; white-space: nowrap; }
+.empty-small { color: var(--text-3); font-size: 13px; padding: 4px 2px; }
+
+/* ---------- results ---------- */
+.results { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.hero-empty { padding: 56px 32px; text-align: center; }
+.hero-empty h1 { font-size: 22px; letter-spacing: -.02em; margin: 14px 0 6px; }
+.hero-empty p { color: var(--text-2); max-width: 520px; margin: 0 auto; }
+.hero-art { width: 64px; height: 64px; border-radius: 16px; margin: 0 auto; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.feature-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; text-align: left; }
+@media (max-width: 640px) { .feature-row { grid-template-columns: 1fr; } }
+.feature { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.feature b { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+.feature span { color: var(--text-3); font-size: 12.5px; }
+
+.run-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.run-title { font-size: 17px; font-weight: 640; letter-spacing: -.01em; font-family: var(--mono); overflow-wrap: anywhere; }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+.status-badge.running, .status-badge.queued { background: var(--accent-soft); color: var(--accent); }
+.status-badge.done { background: var(--ok-soft); color: var(--ok); }
+.status-badge.error { background: var(--sec-soft); color: var(--sec); }
+.spinner { width: 12px; height: 12px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.run-actions { margin-left: auto; display: flex; gap: 6px; }
+
+.stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+@media (max-width: 640px) { .stages { grid-template-columns: 1fr; } }
+.stage { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--surface); }
+.stage.skipped { opacity: .5; border-style: dashed; }
+.stage-top { display: flex; align-items: center; gap: 8px; font-weight: 580; font-size: 13px; }
+.stage-state { margin-left: auto; font-size: 12px; color: var(--text-3); display: inline-flex; gap: 6px; align-items: center; }
+.stage-state.done { color: var(--ok); } .stage-state.running { color: var(--accent); } .stage-state.warn { color: var(--cor); }
+.stage-meta { color: var(--text-3); font-size: 12px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+details.log { margin-top: 12px; }
+details.log summary { cursor: pointer; color: var(--text-3); font-size: 12.5px; }
+.log-lines { margin-top: 8px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; max-height: 220px; overflow: auto; }
+.log-line { font-family: var(--mono); font-size: 12px; color: var(--text-2); white-space: pre-wrap; }
+.log-line .ts { color: var(--text-3); margin-right: 8px; }
+.log-line.warn { color: var(--cor); } .log-line.error { color: var(--sec); }
+.error-box { margin-top: 14px; padding: 12px 14px; background: var(--sec-soft); color: var(--sec); border-radius: 10px; font-size: 13px; overflow-wrap: anywhere; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.stat { padding: 14px 16px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); cursor: pointer; text-align: left; transition: border-color .12s; }
+.stat:hover { border-color: var(--border-strong); }
+.stat.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.stat .n { font-size: 26px; font-weight: 680; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat .l { color: var(--text-3); font-size: 12.5px; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.sw { width: 8px; height: 8px; border-radius: 2px; }
+.sw.security { background: var(--sec); } .sw.correctness { background: var(--cor); } .sw.spec-compliance { background: var(--spec); }
+
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.toolbar input[type=text] { max-width: 260px; padding: 7px 10px; }
+.chip { border: 1px solid var(--border); background: var(--surface); padding: 5px 10px; border-radius: 999px; cursor: pointer; font-size: 12.5px; font-weight: 540; color: var(--text-2); }
+.chip:hover { border-color: var(--border-strong); color: var(--text); }
+.chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.toolbar .spacer { flex: 1; }
+.count-note { color: var(--text-3); font-size: 12.5px; }
+
+.finding { border-left: 3px solid var(--border-strong); overflow: hidden; }
+.finding.security { border-left-color: var(--sec); }
+.finding.correctness { border-left-color: var(--cor); }
+.finding.spec-compliance { border-left-color: var(--spec); }
+.f-head { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; cursor: pointer; }
+.f-head:hover { background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+.f-main { flex: 1; min-width: 0; }
+.f-title { font-weight: 620; font-size: 14.5px; }
+.f-loc { font-family: var(--mono); font-size: 12px; color: var(--text-2); margin-top: 2px; overflow-wrap: anywhere; }
+.f-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: none; max-width: 45%; }
+.badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
+.badge.security { background: var(--sec-soft); color: var(--sec); }
+.badge.correctness { background: var(--cor-soft); color: var(--cor); }
+.badge.spec-compliance { background: var(--spec-soft); color: var(--spec); }
+.badge.conf { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+.badge.conf.hard-must { color: var(--text); border-color: var(--border-strong); }
+.badge.tier { background: var(--accent-soft); color: var(--accent); font-family: var(--mono); }
+.chev { flex: none; color: var(--text-3); transition: transform .15s; margin-top: 2px; }
+.finding.open .chev { transform: rotate(90deg); }
+.f-body { padding: 0 16px 16px 16px; display: none; }
+.finding.open .f-body { display: block; }
+.f-msg { color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+pre.snippet { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin: 12px 0 0; overflow-x: auto; white-space: pre; }
+.f-foot { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 12.5px; color: var(--text-3); align-items: center; }
+.f-foot .mono { color: var(--text-2); }
+.why { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); font-size: 13px; color: var(--text-2); }
+.why b { color: var(--text); }
+
+.clean { padding: 40px 24px; text-align: center; }
+.clean .ok-art { width: 52px; height: 52px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; margin: 0 auto 12px; }
+.clean h3 { margin: 0 0 4px; }
+.clean p { margin: 0; color: var(--text-2); }
+
+/* ---------- checklist ---------- */
+.cl-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.cl-head h1 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+.cl-head p { margin: 4px 0 0; color: var(--text-2); }
+.cl-tiers { margin-left: auto; display: flex; gap: 8px; }
+.cl-cat { margin-bottom: 22px; }
+.cl-cat h3 { font-size: 13px; color: var(--text-2); margin: 0 0 8px; font-weight: 600; }
+.cl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px; }
+.cl-item { padding: 14px 16px; }
+.cl-item .top { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+.cl-num { font-family: var(--mono); color: var(--text-3); font-size: 12px; }
+.cl-item h4 { margin: 0 0 6px; font-size: 14px; }
+.cl-item p { margin: 0; color: var(--text-2); font-size: 13px; }
+.cl-item .ref { margin-top: 8px; font-size: 12px; overflow-wrap: anywhere; }
+.cl-item.flash { animation: flash 1.6s ease; }
+@keyframes flash { 0%, 40% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: var(--shadow); } }
+
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 13px; opacity: 0; transition: all .2s; pointer-events: none; z-index: 50; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (max-width: 640px) {
+  .top-inner { padding: 10px 16px; flex-wrap: wrap; }
+  main { padding: 16px; }
+  .env .pill.opt { display: none; }
+  .f-head { flex-wrap: wrap; } .f-badges { max-width: 100%; justify-content: flex-start; order: 3; width: 100%; padding-left: 0; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="brand-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      MCP Review <small>agent</small>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-view="review" aria-selected="true">Review</button>
+      <button role="tab" data-view="checklist" aria-selected="false">Checklist</button>
+    </nav>
+    <div class="env" id="env"></div>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- ================= REVIEW ================= -->
+  <section class="view" id="view-review">
+    <div class="review-grid">
+      <aside class="side">
+        <form class="card card-pad" id="form" autocomplete="off">
+          <h2 class="section">New review</h2>
+          <div class="seg" role="group">
+            <button type="button" data-mode="pr" aria-pressed="true">GitHub PR</button>
+            <button type="button" data-mode="paste" aria-pressed="false">Paste code</button>
+          </div>
+
+          <div data-pane="pr">
+            <label class="field" for="prRef">Pull request</label>
+            <input type="text" id="prRef" placeholder="https://github.com/owner/repo/pull/123" spellcheck="false">
+            <div class="hint">A PR URL or <code>owner/repo#123</code>. Fetched with the <code>gh</code> CLI.</div>
+          </div>
+
+          <div data-pane="paste" hidden>
+            <label class="field">Source files</label>
+            <div id="files"></div>
+            <div class="row" style="justify-content:space-between">
+              <button type="button" class="link-btn" id="addFile">+ Add file</button>
+              <button type="button" class="link-btn muted" id="loadSample">Load example server</button>
+            </div>
+            <details class="more">
+              <summary>Provide a diff instead (optional)</summary>
+              <textarea id="diffText" placeholder="Paste a unified diff. If empty, the pasted files are reviewed as new files." style="min-height:120px"></textarea>
+            </details>
+          </div>
+
+          <div class="tiers">
+            <label class="tier on locked">
+              <span class="switch"></span>
+              <span><span class="tier-title">Static rules <span class="tag">T0</span></span>
+              <span class="tier-desc">8 regex/heuristic checks. Instant, no API cost.</span></span>
+            </label>
+            <label class="tier" id="tierLlm">
+              <input type="checkbox" id="optLlm">
+              <span class="switch"></span>
+              <span><span class="tier-title">Claude review <span class="tag">T1</span></span>
+              <span class="tier-desc">One Claude call over the diff for the judgment-call checklist items.</span>
+              <span class="warn-note" id="keyWarn" hidden>ANTHROPIC_API_KEY is not set on the server.</span></span>
+            </label>
+            <label class="tier" id="tierAgentic">
+              <input type="checkbox" id="optAgentic">
+              <span class="switch"></span>
+              <span><span class="tier-title">Agentic review <span class="tag">T2</span></span>
+              <span class="tier-desc">Tool-use loop across the whole repo for multi-file issues. Slower, costs more.</span></span>
+            </label>
+          </div>
+
+          <button class="btn-primary" id="runBtn" type="submit">Run review <kbd>⌘↵</kbd></button>
+          <div class="form-error" id="formError" hidden></div>
+        </form>
+
+        <div class="card card-pad">
+          <h2 class="section">Recent runs</h2>
+          <div class="history" id="history"><div class="empty-small">No reviews yet.</div></div>
+        </div>
+      </aside>
+
+      <section class="results" id="results"></section>
+    </div>
+  </section>
+
+  <!-- ================= CHECKLIST ================= -->
+  <section class="view" id="view-checklist" hidden>
+    <div class="cl-head">
+      <div>
+        <h1>MCP mistake checklist</h1>
+        <p>Every item the agent checks for, derived from the MCP spec (2025-11-25) and its security best practices.</p>
+      </div>
+      <div class="cl-tiers" id="clFilters"></div>
+    </div>
+    <div id="checklist"></div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+"use strict";
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+/** Builds DOM from a tag, props and children — all text goes in via textContent, never innerHTML,
+ *  because finding messages and snippets come from reviewed code and model output. */
+function h(tag, props = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "text") el.textContent = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "html") el.innerHTML = v; // only ever used with static SVG literals below
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of children.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return el;
+}
+
+const ICON = {
+  chev: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  check: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  shield: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>',
+  copy: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>',
+  dl: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>',
+  x: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+};
+const SEVERITIES = ["security", "correctness", "spec-compliance"];
+const SEV_LABEL = { security: "Security", correctness: "Correctness", "spec-compliance": "Spec compliance" };
+const CONF_LABEL = { "hard-must": "MUST", "soft-should": "SHOULD", suggestion: "Suggestion" };
+const STAGE_NAMES = { t0: "Static rules", t1: "Claude review", t2: "Agentic review" };
+
+const state = {
+  env: null,
+  checklist: [],
+  checklistById: {},
+  mode: "pr",
+  currentId: null,
+  current: null,
+  pollTimer: null,
+  filters: { severity: null, tier: null, q: "" },
+  open: new Set(),
+  clTier: null,
+};
+
+// ---------------------------------------------------------------- utilities
+async function api(path, opts = {}) {
+  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+  return body;
+}
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1800);
+}
+function safeStore(fn) { try { return fn(); } catch { return null; } }
+function specLinks(ref) {
+  if (!ref) return [];
+  return ref.split(",").map(s => s.trim()).filter(Boolean).map(part => {
+    const path = part.replace(/\s*\(.*\)\s*$/, "").trim();
+    const url = path.startsWith("docs/")
+      ? `https://modelcontextprotocol.io/${path}`
+      : `https://modelcontextprotocol.io/specification/2025-11-25/${path}`;
+    return h("a", { href: url, target: "_blank", rel: "noopener noreferrer", class: "mono", text: part });
+  });
+}
+function joinNodes(nodes, sep) { return nodes.flatMap((n, i) => i ? [sep, n] : [n]); }
+function ago(ts) {
+  const s = Math.max(0, Date.now() / 1000 - ts);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return new Date(ts * 1000).toLocaleDateString();
+}
+function dur(a, b) { if (!a || !b) return ""; const s = b - a; return s < 1 ? `${Math.round(s * 1000)} ms` : `${s.toFixed(1)} s`; }
+
+// ---------------------------------------------------------------- theme
+const themeBtn = $("#themeBtn");
+function applyTheme(t) { if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; }
+applyTheme(safeStore(() => localStorage.getItem("mcp-review-theme")));
+themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const next = cur === "dark" ? "light" : "dark";
+  applyTheme(next); safeStore(() => localStorage.setItem("mcp-review-theme", next));
+});
+
+// ---------------------------------------------------------------- tabs
+$$("nav.tabs button").forEach(btn => btn.addEventListener("click", () => showView(btn.dataset.view)));
+function showView(name) {
+  $$("nav.tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === name)));
+  $$(".view").forEach(v => v.hidden = v.id !== `view-${name}`);
+}
+
+// ---------------------------------------------------------------- env
+function renderEnv() {
+  const e = state.env; const env = $("#env"); env.replaceChildren();
+  if (!e) return;
+  const pill = (ok, label, title, opt) => h("span", { class: "pill" + (opt ? " opt" : ""), title }, h("span", { class: "dot " + (ok ? "ok" : "bad") }), label);
+  env.append(
+    pill(e.api_key, "API key", e.api_key ? "ANTHROPIC_API_KEY is set" : "ANTHROPIC_API_KEY not set — T1/T2 unavailable"),
+    pill(e.gh, "gh", e.gh ? "GitHub CLI found" : "gh CLI not found — PR mode unavailable, use Paste code", true),
+    h("span", { class: "pill opt", title: `Effort: ${e.effort}` }, h("span", { class: "mono", text: e.model })),
+  );
+  $("#keyWarn").hidden = e.api_key;
+}
+
+// ---------------------------------------------------------------- form
+const optLlm = $("#optLlm"), optAgentic = $("#optAgentic");
+function syncTiers() {
+  if (optAgentic.checked && !optLlm.checked) optLlm.checked = true;
+  $("#tierLlm").classList.toggle("on", optLlm.checked);
+  $("#tierAgentic").classList.toggle("on", optAgentic.checked);
+  safeStore(() => localStorage.setItem("mcp-review-tiers", JSON.stringify({ llm: optLlm.checked, agentic: optAgentic.checked })));
+}
+optLlm.addEventListener("change", () => { if (!optLlm.checked) optAgentic.checked = false; syncTiers(); });
+optAgentic.addEventListener("change", syncTiers);
+
+function setMode(mode) {
+  state.mode = mode;
+  $$(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+  $$("[data-pane]").forEach(p => p.hidden = p.dataset.pane !== mode);
+  if (mode === "paste" && !$("#files").children.length) addFile();
+}
+$$(".seg button").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+
+function addFile(path = "", content = "") {
+  const n = $("#files").children.length + 1;
+  const block = h("div", { class: "file-block" },
+    h("div", { class: "file-head" },
+      h("input", { type: "text", class: "fpath", value: path || (n === 1 ? "server.py" : `file${n}.py`), spellcheck: "false", "aria-label": "File path" }),
+      h("button", { type: "button", class: "icon-btn", title: "Remove file", "aria-label": "Remove file", html: ICON.x,
+        onclick: () => { block.remove(); } }),
+    ),
+    h("textarea", { class: "fcontent", spellcheck: "false", placeholder: "Paste your MCP server source here…" }),
+  );
+  $(".fcontent", block).value = content;
+  $("#files").append(block);
+  return block;
+}
+$("#addFile").addEventListener("click", () => addFile());
+
+const SAMPLE = `import logging
+from mcp.server.fastmcp import FastMCP
+import uvicorn
+
+mcp = FastMCP("weather")
+log = logging.getLogger(__name__)
+
+@mcp.tool(name="get weather!")
+def get_weather(city: str, api_token: str) -> str:
+    print(f"fetching weather for {city}")
+    log.info("using token %s", api_token)
+    return f"Sunny in {city}"
+
+@mcp.tool()
+def ping() -> str:
+    return "pong"
+
+if __name__ == "__main__":
+    uvicorn.run(mcp.streamable_http_app(), host="0.0.0.0", port=8000)
+`;
+$("#loadSample").addEventListener("click", () => {
+  $("#files").replaceChildren(); addFile("weather_server.py", SAMPLE); toast("Loaded an intentionally buggy example");
+});
+
+$("#form").addEventListener("submit", e => { e.preventDefault(); submit(); });
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !$("#view-review").hidden) { e.preventDefault(); submit(); }
+});
+
+async function submit() {
+  const err = $("#formError"); err.hidden = true;
+  const body = { mode: state.mode, llm: optLlm.checked, agentic: optAgentic.checked };
+  if (state.mode === "pr") body.pr_ref = $("#prRef").value.trim();
+  else {
+    body.files = $$("#files .file-block").map(b => ({ path: $(".fpath", b).value.trim(), content: $(".fcontent", b).value }));
+    body.diff = $("#diffText").value;
+  }
+  const btn = $("#runBtn"); btn.disabled = true;
+  try {
+    const job = await api("/api/reviews", { method: "POST", body: JSON.stringify(body) });
+    state.filters = { severity: null, tier: null, q: "" }; state.open.clear();
+    openJob(job.id);
+    loadHistory();
+  } catch (ex) {
+    err.textContent = ex.message; err.hidden = false;
+  } finally { btn.disabled = false; }
+}
+
+// ---------------------------------------------------------------- history
+async function loadHistory() {
+  let jobs = [];
+  try { jobs = await api("/api/reviews"); } catch { return; }
+  const box = $("#history"); box.replaceChildren();
+  if (!jobs.length) { box.append(h("div", { class: "empty-small", text: "No reviews yet." })); return; }
+  for (const j of jobs.slice(0, 12)) {
+    const meta = j.status === "done" ? `${j.finding_count} finding${j.finding_count === 1 ? "" : "s"}`
+      : j.status === "error" ? "failed" : "running…";
+    box.append(h("div", { class: "hist-item" + (j.id === state.currentId ? " active" : ""), onclick: () => openJob(j.id), title: j.label },
+      h("span", { class: "dot " + (j.status === "done" ? "ok" : j.status === "error" ? "bad" : "") }),
+      h("span", { class: "hist-label", text: j.label }),
+      h("span", { class: "hist-meta", text: `${meta} · ${ago(j.created_at)}` }),
+    ));
+  }
+}
+
+// ---------------------------------------------------------------- job view
+function openJob(id) {
+  state.currentId = id;
+  clearTimeout(state.pollTimer);
+  safeStore(() => sessionStorage.setItem("mcp-review-job", id));
+  showView("review");
+  poll();
+}
+async function poll() {
+  const id = state.currentId;
+  let job;
+  try { job = await api(`/api/reviews/${id}`); }
+  catch (ex) { if (id === state.currentId) { state.currentId = null; renderResults(); } return; }
+  if (id !== state.currentId) return;
+  const wasRunning = state.current && state.current.id === id && !["done", "error"].includes(state.current.status);
+  state.current = job;
+  renderResults();
+  if (job.status === "queued" || job.status === "running") state.pollTimer = setTimeout(poll, 700);
+  else if (wasRunning) loadHistory();
+}
+
+function renderResults() {
+  const root = $("#results"); root.replaceChildren();
+  const job = state.current;
+  if (!state.currentId || !job) { root.append(renderEmpty()); return; }
+  root.append(renderRunCard(job));
+  if (job.status === "done") root.append(...renderFindings(job));
+}
+
+function renderEmpty() {
+  return h("div", { class: "card hero-empty" },
+    h("div", { class: "hero-art", html: ICON.shield }),
+    h("h1", { text: "Review an MCP server" }),
+    h("p", { text: "Point the agent at a GitHub pull request, or paste server code, and it will check it against 24 known MCP failure modes across the protocol lifecycle, tools, resources, transport and authorization." }),
+    h("div", { class: "feature-row" },
+      h("div", { class: "feature" }, h("b", {}, h("span", { class: "tag", text: "T0" }), "Static rules"), h("span", { text: "Regex and heuristic checks. Free and instant." })),
+      h("div", { class: "feature" }, h("b", {}, h("span", { class: "tag", text: "T1" }), "Claude review"), h("span", { text: "A single structured Claude call reads the diff." })),
+      h("div", { class: "feature" }, h("b", {}, h("span", { class: "tag", text: "T2" }), "Agentic review"), h("span", { text: "Claude explores the repo with tools for cross-file bugs." })),
+    ),
+  );
+}
+
+function renderRunCard(job) {
+  const running = job.status === "queued" || job.status === "running";
+  const badge = h("span", { class: `status-badge ${job.status}` },
+    running ? h("span", { class: "spinner" }) : null,
+    { queued: "Queued", running: "Running", done: "Complete", error: "Failed" }[job.status]);
+
+  const actions = h("div", { class: "run-actions" });
+  if (job.status === "done") {
+    actions.append(
+      h("button", { class: "btn", onclick: () => copyMarkdown(job) }, h("span", { html: ICON.copy }), "Copy Markdown"),
+      h("button", { class: "btn", onclick: () => downloadJson(job) }, h("span", { html: ICON.dl }), "JSON"),
+    );
+  }
+
+  const stages = h("div", { class: "stages" });
+  const enabled = { t0: true, t1: job.options.llm, t2: job.options.agentic };
+  for (const key of ["t0", "t1", "t2"]) {
+    const s = job.stages[key];
+    let stateEl, meta = "";
+    if (!enabled[key]) { stateEl = h("span", { class: "stage-state", text: "Skipped" }); }
+    else if (!s) { stateEl = h("span", { class: "stage-state", text: job.status === "error" ? "Not run" : "Waiting" }); }
+    else if (s.status === "running") { stateEl = h("span", { class: "stage-state running" }, h("span", { class: "spinner" }), "Running"); }
+    else if (s.refused) { stateEl = h("span", { class: "stage-state warn", text: "Refused" }); }
+    else { stateEl = h("span", { class: "stage-state done", html: ICON.check.replace(/22/g, "13") }); stateEl.append(" Done"); }
+    if (s && s.status === "done") {
+      const parts = [`${s.findings} finding${s.findings === 1 ? "" : "s"}`];
+      if (s.input_tokens != null) parts.push(`${(s.input_tokens + s.output_tokens).toLocaleString()} tokens`);
+      if (s.turns) parts.push(`${s.turns} turns`);
+      parts.push(dur(s.started_at, s.finished_at));
+      meta = parts.filter(Boolean).join(" · ");
+    }
+    stages.append(h("div", { class: "stage" + (enabled[key] ? "" : " skipped") },
+      h("div", { class: "stage-top" }, h("span", { class: "tag", text: key.toUpperCase() }), STAGE_NAMES[key], stateEl),
+      meta ? h("div", { class: "stage-meta", text: meta }) : null,
+    ));
+  }
+
+  const log = h("details", { class: "log" }, h("summary", { text: `Activity log (${job.log.length})` }),
+    h("div", { class: "log-lines" }, job.log.map(l => h("div", { class: `log-line ${l.level}` },
+      h("span", { class: "ts", text: new Date(l.t * 1000).toLocaleTimeString() }), l.message))));
+  if (running || job.status === "error") log.open = true;
+
+  return h("div", { class: "card card-pad" },
+    h("div", { class: "run-head" }, h("span", { class: "run-title", text: job.label }), badge, actions),
+    stages,
+    job.error ? h("div", { class: "error-box", text: job.error }) : null,
+    log,
+  );
+}
+
+function renderFindings(job) {
+  const all = job.result.findings;
+  if (!all.length) {
+    return [h("div", { class: "card clean" },
+      h("div", { class: "ok-art", html: ICON.check }),
+      h("h3", { text: "No MCP-specific issues found" }),
+      h("p", { text: job.options.llm ? "Nothing on the checklist tripped for this change." : "No static rule tripped. Enable the Claude review for the judgment-call checklist items." }))];
+  }
+
+  const f = state.filters;
+  const counts = Object.fromEntries(SEVERITIES.map(s => [s, all.filter(x => x.severity === s).length]));
+  const stat = (key, n, label) => h("button", {
+    class: "stat" + ((key === null ? f.severity === null : f.severity === key) ? " active" : ""),
+    onclick: () => { f.severity = key; renderResults(); },
+  }, h("div", { class: "n", text: n }), h("div", { class: "l" }, key ? h("span", { class: `sw ${key}` }) : null, label));
+  const stats = h("div", { class: "stats" }, stat(null, all.length, "All findings"), ...SEVERITIES.map(s => stat(s, counts[s], SEV_LABEL[s])));
+
+  const tiersPresent = [...new Set(all.map(x => x.tier))].sort();
+  const search = h("input", { type: "text", placeholder: "Filter by file, rule or text…", value: f.q, "aria-label": "Filter findings" });
+  search.addEventListener("input", () => { f.q = search.value; renderList(); });
+  const tierChips = tiersPresent.length > 1 ? tiersPresent.map(t => h("button", {
+    class: "chip", "aria-pressed": String(f.tier === t), text: t,
+    onclick: () => { f.tier = f.tier === t ? null : t; renderResults(); },
+  })) : [];
+  const countNote = h("span", { class: "count-note" });
+  const toolbar = h("div", { class: "toolbar" }, search, ...tierChips, h("span", { class: "spacer" }),
+    h("button", { class: "link-btn", text: "Expand all", onclick: () => { visible().forEach(x => state.open.add(keyOf(x))); renderList(); } }),
+    h("button", { class: "link-btn muted", text: "Collapse", onclick: () => { state.open.clear(); renderList(); } }),
+    countNote);
+
+  const list = h("div", { class: "results" });
+  const keyOf = x => `${x.rule_id}|${x.file}|${x.line}|${x.tier}|${x.message.slice(0, 40)}`;
+  function visible() {
+    const q = f.q.trim().toLowerCase();
+    return all.filter(x => (!f.severity || x.severity === f.severity) && (!f.tier || x.tier === f.tier) &&
+      (!q || [x.title, x.message, x.file, x.rule_id, x.snippet].some(v => v && v.toLowerCase().includes(q))));
+  }
+  function renderList() {
+    const items = visible();
+    countNote.textContent = items.length === all.length ? "" : `${items.length} of ${all.length}`;
+    list.replaceChildren(...(items.length ? items.map(x => renderFinding(x, keyOf(x))) :
+      [h("div", { class: "card card-pad empty-small", text: "No findings match these filters." })]));
+  }
+  renderList();
+  return [stats, toolbar, list];
+}
+
+function renderFinding(x, key) {
+  const item = state.checklistById[x.rule_id];
+  const loc = x.file ? `${x.file}${x.line ? `:${x.line}` : ""}` : "Repository-wide";
+  const card = h("article", { class: `card finding ${x.severity}` + (state.open.has(key) ? " open" : "") });
+  const head = h("div", { class: "f-head", role: "button", tabindex: "0", "aria-expanded": String(state.open.has(key)) },
+    h("span", { class: "chev", html: ICON.chev }),
+    h("div", { class: "f-main" }, h("div", { class: "f-title", text: x.title }), h("div", { class: "f-loc", text: loc })),
+    h("div", { class: "f-badges" },
+      h("span", { class: `badge ${x.severity}`, text: SEV_LABEL[x.severity] }),
+      h("span", { class: `badge conf ${x.confidence}`, text: CONF_LABEL[x.confidence] || x.confidence, title: `Spec confidence: ${x.confidence}` }),
+      h("span", { class: "badge tier", text: x.tier }),
+    ),
+  );
+  const toggle = () => {
+    const open = !card.classList.contains("open");
+    card.classList.toggle("open", open); head.setAttribute("aria-expanded", String(open));
+    open ? state.open.add(key) : state.open.delete(key);
+  };
+  head.addEventListener("click", toggle);
+  head.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+
+  const body = h("div", { class: "f-body" },
+    h("div", { class: "f-msg", text: x.message }),
+    x.snippet ? h("pre", { class: "snippet" }, h("code", { text: x.snippet })) : null,
+    item ? h("div", { class: "why" }, h("b", { text: `Checklist #${item.number} · ${item.category}. ` }), item.description) : null,
+    h("div", { class: "f-foot" },
+      h("span", {}, "Rule ", h("a", { href: "#", class: "mono", text: x.rule_id, onclick: e => { e.preventDefault(); jumpToRule(x.rule_id); } })),
+      x.spec_ref ? h("span", {}, "Spec ", ...joinNodes(specLinks(x.spec_ref), ", ")) : null,
+      x.file ? h("button", { class: "link-btn muted", onclick: () => { navigator.clipboard?.writeText(loc); toast("Location copied"); } }, "Copy location") : null,
+    ),
+  );
+  card.append(head, body);
+  return card;
+}
+
+function copyMarkdown(job) {
+  navigator.clipboard?.writeText(job.markdown).then(() => toast("Markdown copied — paste it into a PR comment"), () => toast("Copy failed"));
+}
+function downloadJson(job) {
+  const blob = new Blob([JSON.stringify(job.result, null, 2)], { type: "application/json" });
+  const a = h("a", { href: URL.createObjectURL(blob), download: `mcp-review-${job.label.replace(/[^\w.-]+/g, "_")}.json` });
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+// ---------------------------------------------------------------- checklist
+function renderChecklist() {
+  const filters = $("#clFilters"); filters.replaceChildren(
+    ...[null, "T0", "T1", "T2"].map(t => h("button", { class: "chip", "aria-pressed": String(state.clTier === t), text: t || "All tiers",
+      onclick: () => { state.clTier = t; renderChecklist(); } })));
+  const items = state.checklist.filter(i => !state.clTier || i.tier === state.clTier);
+  const cats = [...new Set(items.map(i => i.category))];
+  $("#checklist").replaceChildren(...cats.map(cat => h("div", { class: "cl-cat" },
+    h("h3", { text: cat }),
+    h("div", { class: "cl-grid" }, items.filter(i => i.category === cat).map(i => h("div", { class: "card cl-item", id: `rule-${i.id}` },
+      h("div", { class: "top" },
+        h("span", { class: "cl-num", text: `#${String(i.number).padStart(2, "0")}` }),
+        h("span", { class: `badge ${i.severity}`, text: SEV_LABEL[i.severity] }),
+        h("span", { class: `badge conf ${i.confidence}`, text: CONF_LABEL[i.confidence] }),
+        h("span", { class: "badge tier", text: i.tier })),
+      h("h4", { text: i.title }),
+      h("p", { text: i.description }),
+      h("div", { class: "ref" }, h("span", { class: "mono", style: "color:var(--text-3)", text: i.id + " · " }), ...joinNodes(specLinks(i.spec_ref), ", ")),
+    ))))));
+}
+function jumpToRule(id) {
+  state.clTier = null; renderChecklist(); showView("checklist");
+  const el = document.getElementById(`rule-${id}`);
+  if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+}
+
+// ---------------------------------------------------------------- boot
+(async function boot() {
+  const saved = safeStore(() => JSON.parse(localStorage.getItem("mcp-review-tiers")));
+  try {
+    const [env, checklist] = await Promise.all([api("/api/status"), api("/api/checklist")]);
+    state.env = env; state.checklist = checklist;
+    state.checklistById = Object.fromEntries(checklist.map(i => [i.id, i]));
+  } catch (ex) { toast(`Could not reach the server: ${ex.message}`); }
+  renderEnv(); renderChecklist();
+  optLlm.checked = saved ? !!saved.llm : !!(state.env && state.env.api_key);
+  optAgentic.checked = saved ? !!saved.agentic : false;
+  syncTiers();
+  if (state.env && !state.env.gh) setMode("paste");
+  const last = safeStore(() => sessionStorage.getItem("mcp-review-job"));
+  if (last) openJob(last); else renderResults();
+  loadHistory();
+  setInterval(loadHistory, 15000);
+})();
+})();
+</script>
+</body>
+</html>
