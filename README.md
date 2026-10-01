@@ -23,7 +23,7 @@ for the original community validation post (no responses yet as of this writing)
 
 ## Roadmap
 
-1. **Learn the failure modes** — a 24-item checklist of concrete MCP server mistakes across 7 categories (protocol lifecycle, tools, resources, sampling, elicitation, transport, authorization), each tagged by detection method, severity, spec confidence, and cost tier. ✅ Done — `src/mcp_review/checklist.py`.
+1. **Learn the failure modes** — a 24-item checklist of concrete MCP server mistakes across 9 categories (protocol & lifecycle, tools, resources & roots, sampling, elicitation, change notifications, transport, authorization, operational utilities), each tagged by detection method, severity, spec confidence, and cost tier. ✅ Done — `src/mcp_review/checklist.py`.
 2. **Phase 1 — Non-agentic MVP** — fetch PR diffs and run a single Claude API call against the checklist, posting results as a PR review comment. Backtested against historical PRs before going live.
    - ✅ T0 static rule engine (8 rules, regex/heuristic, zero API cost)
    - ✅ T1 single-call Claude reviewer (Sonnet 5, structured JSON output, refusal-handling for security-sensitive diffs)
